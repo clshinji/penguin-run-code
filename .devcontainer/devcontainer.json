@@ -1,0 +1,27 @@
+// See https://containers.dev/implementors/json_reference/ for configuration reference
+{
+	"name": "Untitled Node.js project",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"remoteUser": "node",
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {},
+		"ghcr.io/devcontainers/features/python:1": {
+			"version": "3.12"
+		}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"anthropic.claude-code",
+				"dbaeumer.vscode-eslint",
+				"streetsidesoftware.code-spell-checker",
+				"mhutchie.git-graph",
+				"oderwat.indent-rainbow",
+				"ritwickdey.live",
+				"shardulm94.trailing-spaces"
+			]
+		}
+	}
+}
