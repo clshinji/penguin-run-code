@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { Player } from '../game/Player';
 
 /**
  * メインゲームシーン
@@ -29,12 +30,10 @@ export class GameScene extends Phaser.Scene {
     }
     
     // プレイヤーを作成
-    this.player = this.physics.add.sprite(100, height - 100, 'player');
-    this.player.setBounce(0.2);
-    this.player.setCollideWorldBounds(true);
+    this.player = new Player(this, 100, height - 100);
     
     // プレイヤーと地面の衝突を設定
-    this.physics.add.collider(this.player, this.platforms);
+    this.physics.add.collider(this.player.sprite, this.platforms);
     
     // キーボード入力を設定
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -42,10 +41,7 @@ export class GameScene extends Phaser.Scene {
     
     // ゲーム状態の初期化
     this.gameState = {
-      health: 3,
       score: 0,
-      isFloating: false,
-      floatTime: 0,
     };
     
     // HUD要素を作成
@@ -60,7 +56,7 @@ export class GameScene extends Phaser.Scene {
 
   createHUD() {
     // ライフ表示
-    this.healthText = this.add.text(20, 20, `ライフ: ${this.gameState.health}`, {
+    this.healthText = this.add.text(20, 20, `ライフ: ${this.player.health}`, {
       fontSize: '20px',
       fontFamily: 'Arial, sans-serif',
       color: '#ffffff',
@@ -90,28 +86,34 @@ export class GameScene extends Phaser.Scene {
   update() {
     // プレイヤーの移動処理
     if (this.cursors.left.isDown) {
-      this.player.setVelocityX(-200);
+      this.player.move('left');
     } else if (this.cursors.right.isDown) {
-      this.player.setVelocityX(200);
+      this.player.move('right');
     } else {
-      this.player.setVelocityX(0);
+      this.player.move('stop');
     }
     
     // ジャンプ処理
-    if (this.spaceKey.isDown && this.player.body.touching.down) {
-      this.player.setVelocityY(-400);
+    if (this.spaceKey.isDown && this.player.sprite.body.touching.down) {
+      this.player.jump();
     }
     
-    // 浮遊処理（基本実装）
-    if (this.spaceKey.isDown && !this.player.body.touching.down) {
-      if (this.gameState.floatTime < 3000) {
-        this.player.setVelocityY(this.player.body.velocity.y * 0.8);
-        this.gameState.floatTime += 16; // 約60FPSで16ms
-        this.gameState.isFloating = true;
-      }
+    // 浮遊処理
+    if (this.spaceKey.isDown && !this.player.sprite.body.touching.down) {
+      this.player.float();
     } else {
-      this.gameState.floatTime = Math.max(0, this.gameState.floatTime - 32);
-      this.gameState.isFloating = false;
+      this.player.stopFloat();
     }
+    
+    // プレイヤーの更新処理
+    this.player.update(16); // 約60FPSで16ms
+    
+    // HUD更新
+    this.updateHUD();
+  }
+  
+  updateHUD() {
+    this.healthText.setText(`ライフ: ${this.player.health}`);
+    this.scoreText.setText(`スコア: ${this.gameState.score}`);
   }
 }
